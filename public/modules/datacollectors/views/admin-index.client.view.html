@@ -1,0 +1,88 @@
+<div class="container" id="admin-index" ng-controller="AdminController">
+    <br>
+    <tabset>
+        <tab
+             heading="User Administration"
+             active=workspace.active>
+
+                <form name="form">
+                    <div class="form-group">
+                        <br>
+                        <legend><strong>Users</strong> </legend>
+                            <div  dx-data-grid="usersGridOptions"></div>
+                                <br>
+                        <div class="col-sm-4">
+                        <button ng-click="grantSelectedRolesToSelectedUsers()">Grant selected Roles to selected Users</button>
+                        </div>
+                        <div class="col-sm-3">
+                            <button ng-click="removeSelectedUsers()">Remove selected Users</button>
+                        </div>
+                        <br>
+                        <div class="col-sm-12">
+                            <br>
+                        <legend><strong>Roles</strong> </legend>
+                            <div  dx-data-grid="rolesGridOptions"></div>
+                        </div>
+                                <br>
+                        <legend><strong>Access Requests</strong> </legend>
+                            <div  dx-data-grid="accessRequestsGridOptions"></div>
+                        <br>
+                        <div class="col-sm-3">
+                            <button ng-click="grantRequestedRoles()">Grant Requested Roles</button>
+                        </div>
+                        <div class="col-sm-4">
+                            <button ng-click="removeSelectedAccessRequest()">Remove selected access request</button>
+                        </div>
+
+                        <div class="col-sm-5">
+                            <button ng-click="">Grant additional role</button>
+                        </div>
+                    </div>
+                </form>
+        </tab>
+        <tab>
+            <tab-heading> Add Users</tab-heading>
+            <br>
+            <div ng-controller="AdminController">
+            <form name="role-admin-form">
+                <div class="form-group">
+                    <fieldset>
+                        <div class="col-sm-12">
+                            <br>
+                            <legend><strong>Add Users</strong> </legend>
+                        </div>
+
+                        <div class="col-sm-4">
+                            <label for="firstName">First Name</label>
+                            <input type="text" required id="firstName" name="firstName" class="form-control" ng-model="userFirstName" placeholder="First Name">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" name="lastName" class="form-control" ng-model="userLastName" placeholder="Last Name">
+                            <button style="margin-top: 20px;margin-bottom: 20px" type="submit" class="btn" ng-click="addUser()">Add User</button>
+                        </div>
+
+                        <div class="col-sm-4">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" class="form-control" ng-model="userEmail" placeholder="Email">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" class="form-control" ng-model="userUsername" placeholder="Username">
+                        </div>
+
+                        <div class="col-sm-4">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" class="form-control" data-ng-model="userPassword" placeholder="Password">
+                        </div>
+
+                    </fieldset>
+                </div>
+            </form>
+            </div>
+        </tab>
+        <tab>
+            <tab-heading>Playcards Automation</tab-heading>
+            <form id="generatePlaycards">
+                <button ng-click="generatePlaycardsFromDcInventory()">Generate Playcards From DC Inventory</button>
+            </form>
+        </tab>
+    </tabset>
+    <br/>
+</div>
