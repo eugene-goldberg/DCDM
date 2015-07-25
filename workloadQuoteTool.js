@@ -5,6 +5,8 @@
 var init = require('./config/init')(),
 	config = require('./config/config'),
 	mongoose = require('mongoose'),
+    RedisSMQ = require("rsmq"),
+    rsmq = new RedisSMQ( {host: "localhost", port: 6379, ns: "rsmq"}),
 	chalk = require('chalk');
 
 /**
@@ -20,6 +22,14 @@ var db = mongoose.connect(config.db, function(err) {
 	}
 });
 
+function createQueue(){
+    rsmq.createQueue({qname:"myqueue"}, function (err, resp) {
+        if (resp===1) {
+            console.log("queue created")
+        }
+    });
+}
+
 // Init the express application
 var app = require('./config/express')(db);
 
@@ -34,6 +44,8 @@ app.get('server').listen(config.port);
 app.on('error', function(err) {
     console.log('caught ' + err);
 });
+
+createQueue();
 
 // Expose app
 exports = module.exports = app;

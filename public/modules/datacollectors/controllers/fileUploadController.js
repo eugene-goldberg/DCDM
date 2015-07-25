@@ -2,8 +2,8 @@
 
 // FileUploadController controller
 angular.module('datacollectors').controller('FileUploadController',
-    ['$scope', '$http', '$stateParams', '$location', 'Authentication', 'Datacollectors', 'FileUploader',
-    function($scope, $http, $stateParams, $location, Authentication, Datacollectors, FileUploader) {
+    ['$scope', '$http', '$stateParams', '$location','$socket', 'Authentication', 'Datacollectors', 'FileUploader',
+    function($scope, $http, $stateParams, $location,$socket, Authentication, Datacollectors, FileUploader) {
         $scope.authentication = Authentication;
 
         $scope.uploadUrl = '';
@@ -14,6 +14,10 @@ angular.module('datacollectors').controller('FileUploadController',
             //url: 'http://dctool-lnx.cloudapp.net:3001/api/files',
             //url:    url,
             //tabName: 'sheet1'
+        });
+
+        $socket.on('upload finished', function(param) {
+            alert('upload finished');
         });
 
         console.log('This is FileUploadController');

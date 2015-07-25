@@ -20,6 +20,10 @@ var fs = require('fs'),
     format = require('date-format'),
     nodemailer = require('nodemailer'),
     socketio = require('socket.io'),
+    RedisSMQ = require("rsmq"),
+    rsmq = new RedisSMQ( {host: "localhost", port: 6379, ns: "rsmq"}),
+    RSMQWorker = require( "rsmq-worker"),
+    worker = new RSMQWorker( "myqueue"),
 	mongoStore = require('connect-mongo')({
 		session: session
 	}),
@@ -70,6 +74,30 @@ module.exports = function(db) {
 	config.getGlobbedFiles('./app/models/**/*.js').forEach(function(modelPath) {
 		require(path.resolve(modelPath));
 	});
+
+    function startWorker(){
+        worker.start();
+    }
+
+    worker.on( "message", function( msg, next ){
+        console.log( 'recieved queue messahe: ' + msg );
+        var socketio = app.get('socketio'); // tacke out socket instance from the app container
+        socketio.sockets.emit('upload finished','param-2'); // emit an event for all connected clients
+        next()
+    });
+
+    // optional error listeners
+    worker.on('error', function( err, msg ){
+        console.log( "ERROR", err, msg.id );
+    });
+    worker.on('exceeded', function( msg ){
+        console.log( "EXCEEDED", msg.id );
+    });
+    worker.on('timeout', function( msg ){
+        console.log( "TIMEOUT", msg.id, msg.rc );
+    });
+
+
 
 	// Setting application local variables
 	app.locals.title = config.app.title;
@@ -125,6 +153,7 @@ module.exports = function(db) {
 		})
 	}));
 
+
 	function translateToString(input){
 		var result="";
 		input.forEach(function(item){
@@ -132,6 +161,14 @@ module.exports = function(db) {
 		});
 		return result.slice(1);
 	}
+
+    function sendMessage(){
+        rsmq.sendMessage({qname:"myqueue", message:"Hello World"}, function (err, resp) {
+            if (resp) {
+                console.log("Message sent. ID:", resp);
+            }
+        });
+    }
 
 	app.get('/mongodata', function(req, res){
         console.log('Request Successful');
@@ -844,9 +881,6 @@ module.exports = function(db) {
         console.log('Salesforce DC update Request Received');
         console.log('request body:  ' + req.body);
 
-        var socketio = req.app.get('socketio'); // tacke out socket instance from the app container
-        socketio.sockets.emit('updated','param-2'); // emit an event for all connected clients
-
             var kWLeased2016 = Math.round(((Number(req.body.kwRequired_2016) * 185) * 12));
             var kWLeased2017 = Math.round(((Number(req.body.kwRequired_2017) * 185) * 12));
             var kWLeased2018 = Math.round(((Number(req.body.kwRequired_2018) * 185) * 12));
@@ -1053,6 +1087,8 @@ module.exports = function(db) {
                                                      httpResponse.send(500);
                                                  }
                                                  else {
+                                                     var socketio = req.app.get('socketio'); // tacke out socket instance from the app container
+                                                     socketio.sockets.emit('updated','param-2'); // emit an event for all connected clients
                                                      httpResponse.send(201,fileName);
                                                  }
                                              });
@@ -1173,6 +1209,8 @@ module.exports = function(db) {
                                                     httpResponse.send(500);
                                                 }
                                                 else {
+                                                    var socketio = req.app.get('socketio'); // tacke out socket instance from the app container
+                                                    socketio.sockets.emit('updated','param-2'); // emit an event for all connected clients
                                                     httpResponse.status(201).send(fileName);
                                                 }
                                             });
@@ -2030,6 +2068,8 @@ module.exports = function(db) {
     var io = socketio.listen(server);
     app.set('socketio', io);
     app.set('server', server);
+
+    startWorker();
 
 	return app;
 };
